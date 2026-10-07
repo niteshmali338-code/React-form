@@ -2,7 +2,7 @@ import FormInput from './FormInput'
 import SectionCard from './SectionCard'
 
 function EducationInformation({ records, errors, onChange, onAdd, onRemove }) {
-  return <SectionCard number="04" title="Education" description="Add your most relevant academic qualifications.">
+  return <SectionCard id="education-information" number="04" title="Education" description="Add your most relevant academic qualifications.">
     <div className="record-list">{records.map((record, index) => 
         <div className="record-block" key={`education-${index}`}>
             <div className="record-title">
