@@ -1,2 +1,2 @@
-function SectionCard({ number, title, description, children }) { return <section className="section-card card border-0 mb-4"><div className="card-body p-4 p-lg-5"><div className="section-heading"><span className="section-number">{number}</span><div><h2>{title}</h2><p>{description}</p></div></div>{children}</div></section> }
+function SectionCard({ id, number, title, description, children }) { return <section id={id} className="section-card card border-0 mb-4"><div className="card-body p-4 p-lg-5"><div className="section-heading"><span className="section-number">{number}</span><div><h2>{title}</h2><p>{description}</p></div></div>{children}</div></section> }
 export default SectionCard
