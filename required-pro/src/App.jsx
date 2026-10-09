@@ -162,13 +162,15 @@ function App() {
   })
   const validate = () => { const nextErrors = validateForm(formData); setErrors(nextErrors); return !hasErrors(nextErrors) }
   const handleReview = (event) => { event.preventDefault(); setStatus({ type: '', message: '' }); if (validate()) setView('review'); else setStatus({ type: 'error', message: 'Please correct the highlighted fields before continuing.' }) }
-  const handleSubmit = async () => { setIsSubmitting(true); setStatus({ type: '', message: '' }); try { await submitApplication(formData); setStatus({ type: 'success', message: 'Your application has been submitted successfully.' }); setView('success') } catch (error) { setStatus({ type: 'error', message: error.message }) } finally { setIsSubmitting(false) } }
+  const handleSubmit = async () => { setIsSubmitting(true); setStatus({ type: '', message: '' }); try { const result = await submitApplication(formData); setStatus({ type: 'success', message: `Your application has been saved successfully. Reference: ${result.applicationId}` }); setView('success') } catch (error) { setStatus({ type: 'error', message: error.message }) } finally { setIsSubmitting(false) } }
 
   return (
     <main className="app-shell">
       <header className="site-header">
         <div className="container app-container d-flex align-items-center justify-content-between gap-3 h-100">
-          <a className="brand" href="#home" aria-label="Northstar home">
+          <a className="brand" href="#home" aria-label="Northstar application form home">
+            <img className="brand-logo" src="/logo.svg" alt="" />
+            <span>Application Form<span className="brand-dot">.</span></span>
           </a>
         </div>
       </header>
@@ -196,7 +198,7 @@ function App() {
               <p className="intro-copy">Tell us a little about yourself. Your application takes about 5 minutes to complete.</p>
             </section>
             {status.message && <div className="alert alert-danger" role="alert">{status.message}</div>}
-            {isHydrated && <div className="alert alert-light border" role="status">Saved locally as you type.</div>}
+            {isHydrated && <div className="alert alert-light border" role="status">Drafts are saved on this device. Submitted applications are saved to the database.</div>}
             <form onSubmit={handleReview} noValidate>
               <PersonalInformation
                 data={formData.personal}

@@ -10,7 +10,7 @@ A professional, responsive React application form for collecting candidate perso
 - Accessible labels, error messaging, keyboard-friendly controls, and ARIA attributes.
 - Responsive Bootstrap grid for desktop, tablet, and mobile layouts.
 - Loading, validation error, API failure, and successful submission states.
-- Mock Promise-based application submission service.
+- SQLite-backed application submission service.
 
 ## Technologies
 
@@ -19,6 +19,7 @@ A professional, responsive React application form for collecting candidate perso
 - JavaScript (ES6+)
 - Bootstrap 5
 - CSS with responsive media queries
+- Node.js built-in SQLite database for submitted applications
 
 ## Installation and running
 
@@ -27,7 +28,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL shown by Vite. Production validation is available with `npm run build` and `npm run lint`.
+Open the local URL shown by Vite. Vite mounts the SQLite API automatically, so only one command is needed during development. Confirmed applications are stored in `data/applications.sqlite`; drafts remain saved in the current browser. Use Node.js 22.13 or later for the built-in SQLite module. A production deployment must host `server.js` and route `/api/applications` to that API. Production validation is available with `npm run build` and `npm run lint`.
 
 ## Project structure
 
@@ -49,16 +50,17 @@ src/
 ├── App.css
 ├── index.css
 └── main.jsx
+server.js
 ```
 
 ## Validation
 
 Required fields are checked across every section. Email uses a format check, mobile numbers require 10 digits, pincodes require 5 or 6 digits, education scores must be numeric from 0 to 100, passing years must be four-digit years, and experience end dates cannot precede start dates. Errors are shown beside their field and connected with `aria-describedby`.
 
-## Mock service
+## Application storage
 
-`src/services/applicationService.js` simulates a network request with a 1.2 second delay and returns a generated application ID. The service is isolated from the UI so it can be replaced with `fetch` or Axios later.
+The API accepts confirmed applications at `POST /api/applications`, stores the complete form data as JSON in SQLite, and returns a generated application reference. The database is created automatically on first server start and is excluded from version control. Drafts continue to be saved in browser local storage.
 
 ## Testing checklist
 
-Manually test empty submission, invalid email/mobile/pincode, invalid education score and year, invalid experience date ranges, a complete valid application, keyboard navigation, mobile widths, review editing, loading feedback, and the success state. The service also exposes a failure path when called without application data.
+Manually test empty submission, invalid email/mobile/pincode, invalid education score and year, invalid experience date ranges, a complete valid application, keyboard navigation, mobile widths, review editing, loading feedback, and the success state. `npm run dev` starts both the frontend and database API.
