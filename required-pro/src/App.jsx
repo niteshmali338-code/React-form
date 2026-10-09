@@ -168,6 +168,10 @@ function App() {
     <main className="app-shell">
       <header className="site-header">
         <div className="container app-container d-flex align-items-center justify-content-between gap-3 h-100">
+          <a className="brand" href="#home" aria-label="Northstar application form home">
+            <img className="brand-logo" src="/logo.svg" alt="" />
+            <span>Application Form<span className="brand-dot">.</span></span>
+          </a>
         </div>
       </header>
       {view === 'form' && (

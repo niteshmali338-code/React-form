@@ -2,6 +2,9 @@
 .app-container { max-width: 980px; }
 .site-header { border-bottom: 1px solid #dce6df; background: rgba(255,255,255,.75); }
 .site-header .app-container { height: 76px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: #19252b; font-size: 1.25rem; font-weight: 700; letter-spacing: -.04em; text-decoration: none; }
+.brand:hover, .brand:focus-visible { color: #175c4d; text-decoration: none; }
+.brand-logo { display: block; width: 42px; height: 42px; object-fit: contain; }
 .header-sections { color: #175c4d; font-size: 1.1rem; font-weight: 700; letter-spacing: -.03em; }
 .brand-dot, .eyebrow { color: #d27b45; }.header-note { color: #73817b; font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
 .section-nav { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #dce6df; background:white; }

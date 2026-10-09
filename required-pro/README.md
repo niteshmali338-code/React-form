@@ -10,7 +10,7 @@ A professional, responsive React application form for collecting candidate perso
 - Accessible labels, error messaging, keyboard-friendly controls, and ARIA attributes.
 - Responsive Bootstrap grid for desktop, tablet, and mobile layouts.
 - Loading, validation error, API failure, and successful submission states.
-- Mock Promise-based application submission service.
+- SQLite-backed application submission service.
 
 ## Technologies
 
@@ -28,13 +28,7 @@ npm install
 npm run dev
 ```
 
-In a second terminal, start the database API:
-
-```bash
-npm run server
-```
-
-Open the local URL shown by Vite. The API stores confirmed applications in `data/applications.sqlite`; Vite proxies `/api` requests to the local API server. Drafts remain saved in the current browser. Use Node.js 22.13 or later for the built-in SQLite module. Production validation is available with `npm run build` and `npm run lint`.
+Open the local URL shown by Vite. Vite mounts the SQLite API automatically, so only one command is needed during development. Confirmed applications are stored in `data/applications.sqlite`; drafts remain saved in the current browser. Use Node.js 22.13 or later for the built-in SQLite module. A production deployment must host `server.js` and route `/api/applications` to that API. Production validation is available with `npm run build` and `npm run lint`.
 
 ## Project structure
 
@@ -69,4 +63,4 @@ The API accepts confirmed applications at `POST /api/applications`, stores the c
 
 ## Testing checklist
 
-Manually test empty submission, invalid email/mobile/pincode, invalid education score and year, invalid experience date ranges, a complete valid application, keyboard navigation, mobile widths, review editing, loading feedback, and the success state. Keep both the Vite development server and the database API running to submit applications.
+Manually test empty submission, invalid email/mobile/pincode, invalid education score and year, invalid experience date ranges, a complete valid application, keyboard navigation, mobile widths, review editing, loading feedback, and the success state. `npm run dev` starts both the frontend and database API.

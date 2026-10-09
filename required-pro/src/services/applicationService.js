@@ -61,11 +61,20 @@ export async function submitApplication(application) {
     throw new Error('Unable to submit your application. Please check that the application server is running and try again.')
   }
 
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) {
+    throw new Error('The application API returned an unexpected response. Restart the app with npm run dev, or configure your deployed site to route /api/applications to the database API.')
+  }
+
   let result
   try {
     result = await response.json()
   } catch {
     throw new Error('The application server returned an invalid response. Please try again.')
+  }
+
+  if (response.ok && (!result || typeof result.applicationId !== 'string')) {
+    throw new Error('The application server response is missing an application reference. Please try again.')
   }
 
   if (!response.ok) {

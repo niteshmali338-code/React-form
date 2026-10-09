@@ -1,5 +1,6 @@
 import { createServer } from 'node:http'
 import { Buffer } from 'node:buffer'
+import { once } from 'node:events'
 import { mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -11,23 +12,7 @@ const defaultDatabasePath = fileURLToPath(new URL('./data/applications.sqlite', 
 const databasePath = process.env.DATABASE_PATH
   ? resolve(process.env.DATABASE_PATH)
   : defaultDatabasePath
-const port = Number(process.env.PORT || 3001)
 const maxRequestSize = 10 * 1024 * 1024
-
-mkdirSync(dirname(databasePath), { recursive: true })
-
-const database = new DatabaseSync(databasePath)
-database.exec(`
-  CREATE TABLE IF NOT EXISTS applications (
-    id TEXT PRIMARY KEY,
-    submitted_at TEXT NOT NULL,
-    data_json TEXT NOT NULL
-  )
-`)
-
-const insertApplication = database.prepare(
-  'INSERT INTO applications (id, submitted_at, data_json) VALUES (?, ?, ?)',
-)
 
 class RequestError extends Error {
   constructor(statusCode, message) {
@@ -75,39 +60,77 @@ function respond(response, statusCode, payload) {
   response.end(JSON.stringify(payload))
 }
 
-const server = createServer(async (request, response) => {
-  if (request.method !== 'POST' || request.url !== '/api/applications') {
-    respond(response, 404, { error: 'Not found.' })
-    return
-  }
+export function createApplicationHandler() {
+  mkdirSync(dirname(databasePath), { recursive: true })
 
-  try {
-    const application = await readJsonBody(request)
-    if (!isApplication(application)) {
-      throw new RequestError(400, 'Application data is incomplete or invalid.')
-    }
+  const database = new DatabaseSync(databasePath)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS applications (
+      id TEXT PRIMARY KEY,
+      submitted_at TEXT NOT NULL,
+      data_json TEXT NOT NULL
+    )
+  `)
 
-    const applicationId = `APP-${randomUUID()}`
-    const submittedAt = new Date().toISOString()
-    insertApplication.run(applicationId, submittedAt, JSON.stringify(application))
+  const insertApplication = database.prepare(
+    'INSERT INTO applications (id, submitted_at, data_json) VALUES (?, ?, ?)',
+  )
 
-    respond(response, 201, { success: true, applicationId, submittedAt })
-  } catch (error) {
-    if (error instanceof RequestError) {
-      respond(response, error.statusCode, { error: error.message })
+  const handler = async (request, response) => {
+    if (request.method !== 'POST' || request.url?.split('?')[0] !== '/api/applications') {
+      respond(response, 404, { error: 'Not found.' })
       return
     }
 
-    console.error('Unable to save application to SQLite.', error)
-    respond(response, 500, { error: 'Unable to save your application. Please try again.' })
+    try {
+      const application = await readJsonBody(request)
+      if (!isApplication(application)) {
+        throw new RequestError(400, 'Application data is incomplete or invalid.')
+      }
+
+      const applicationId = `APP-${randomUUID()}`
+      const submittedAt = new Date().toISOString()
+      insertApplication.run(applicationId, submittedAt, JSON.stringify(application))
+
+      respond(response, 201, { success: true, applicationId, submittedAt })
+    } catch (error) {
+      if (error instanceof RequestError) {
+        respond(response, error.statusCode, { error: error.message })
+        return
+      }
+
+      console.error('Unable to save application to SQLite.', error)
+      respond(response, 500, { error: 'Unable to save your application. Please try again.' })
+    }
   }
-})
 
-server.on('error', (error) => {
-  console.error('Application API server failed to start.', error)
-  process.exitCode = 1
-})
+  handler.close = () => database.close()
+  return handler
+}
 
-server.listen(port, '127.0.0.1', () => {
+export async function startApplicationServer(port = Number(process.env.API_PORT || process.env.PORT || 3001)) {
+  const handler = createApplicationHandler()
+  const server = createServer(handler)
+  server.on('error', (error) => {
+    console.error('Application API server failed.', error)
+  })
+  server.on('close', handler.close)
+
+  try {
+    server.listen(port, '127.0.0.1')
+    await once(server, 'listening')
+  } catch (error) {
+    handler.close()
+    throw error
+  }
+
   console.log(`Application API listening on http://127.0.0.1:${port}`)
-})
+  return server
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  startApplicationServer().catch((error) => {
+    console.error('Application API server failed to start.', error)
+    process.exitCode = 1
+  })
+}
