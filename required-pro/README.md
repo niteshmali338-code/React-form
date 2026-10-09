@@ -1,4 +1,4 @@
-# Northstar Application Form
+ Application Form
 
 A professional, responsive React application form for collecting candidate personal, contact, address, education, and experience details.
 
