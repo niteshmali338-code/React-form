@@ -50,8 +50,28 @@ export async function clearDraft() {
 export async function submitApplication(application) {
   if (!application) throw new Error('We could not submit your application. Please try again.')
 
-  await new Promise((resolve) => window.setTimeout(resolve, 1200))
-  await clearDraft()
+  let response
+  try {
+    response = await fetch('/api/applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(application),
+    })
+  } catch {
+    throw new Error('Unable to submit your application. Please check that the application server is running and try again.')
+  }
 
-  return { success: true, applicationId: `APP-${Date.now()}` }
+  let result
+  try {
+    result = await response.json()
+  } catch {
+    throw new Error('The application server returned an invalid response. Please try again.')
+  }
+
+  if (!response.ok) {
+    throw new Error(result.error || 'We could not submit your application. Please try again.')
+  }
+
+  await clearDraft()
+  return result
 }
