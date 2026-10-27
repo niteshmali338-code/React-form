@@ -313,7 +313,7 @@ export default function App() {
         <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <div>
             <h1 className="font-black text-2xl text-slate-900 tracking-tight leading-none flex items-center">
-              Application Form<span className="text-amber-500 font-black">.</span>
+              Application Form<span className="text-amber-500 font-black"></span>
             </h1>
           </div>
 
